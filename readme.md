@@ -21,6 +21,14 @@ The data includes the total acres of NPS-managed land in each state, with Alaska
 - **Responsive Design**: The map adjusts seamlessly to different screen sizes.
 - **Legend**: A dynamic legend provides context to the color scale.
 
+## Technologies Used
+
+Leaflet.js – Core web mapping library
+Leaflet-AJAX – To load GeoJSON data asynchronously
+Chroma.js – For creating color scales
+jQuery – For DOM manipulation
+HTML5, CSS3, JavaScrip
+
 ## Author
 
 Zachary Watkins
