@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>US National Park Land by State</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.0/dist/leaflet.css"/>
+
+    <style>
+      html, body { height:100%; margin:0; padding:0; }
+      #map { width:100%; height:100%; }
+      .info {
+        z-index: 1000;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        padding: 6px 8px;
+        font: 14px Arial, Helvetica, sans-serif;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
+        text-align: right;
+      }
+      .info h4 { margin:0 0 5px; color:#777; font-size:16px; }
+      .legend {
+        z-index:1000;
+        position:absolute;
+        right:20px;
+        bottom:20px;
+        padding:6px 8px;
+        font:14px Arial, Helvetica, sans-serif;
+        background: rgba(255,255,255,0.8);
+        box-shadow:0 0 15px rgba(0,0,0,0.2);
+        border-radius:5px;
+      }
+      .legend i { width:18px; height:16px; float:left; margin-right:8px; opacity:0.7; }
+    </style>
+
+    <script src="https://unpkg.com/leaflet@1.7.0/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  </head>
+  
+<body>
+  <div id="map"></div>
+  <div class="legend"></div>
+
+  <script>
+    // Create map
+    var map = L.map('map').setView([37.8, -96], 5);
+    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png').addTo(map);
+
+    // Choropleth breaks and color scale
+    var grades = [0, 10000, 50000, 100000, 500000, 1000000, 2000000, 4000000]; // adjust to your dataset
+    var colors = chroma.scale('Blues').colors(grades.length);
+
+    function getColor(d) {
+      for (var i = 0; i < grades.length - 1; i++) {
+        if (d > grades[i] && d <= grades[i+1]) return colors[i];
+      }
+      return colors[grades.length - 1];
+    }
+
+    function style(feature) {
+      return {
+        weight: 2,
+        opacity: 1,
+        color: 'grey',
+        dashArray: '3',
+        fillOpacity: 0.7,
+        fillColor: getColor(feature.properties.acres)
+      };
+    }
+
+    // Info control
+    var info = L.control();
+    info.onAdd = function(map) {
+      this._div = L.DomUtil.create('div','info');
+      this.update();
+      return this._div;
+    };
+    info.update = function(props) {
+      this._div.innerHTML = '<h4>US National Park Land</h4>' + 
+        (props ? '<b>' + props.name + '</b><br />' + props.acres.toLocaleString() + ' acres'
+               : 'Hover over a state');
+    };
+    info.addTo(map);
+
+    // Highlight functions
+    function highlightFeature(e) {
+      var layer = e.target;
+      layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+      });
+      layer.bringToFront();
+      info.update(layer.feature.properties);
+    }
+
+    function resetHighlight(e) {
+      geojson.resetStyle(e.target);
+      info.update();
+    }
+
+    function zoomToFeature(e) {
+      map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+      layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+      });
+    }
+
+    // Load GeoJSON
+    var geojson = L.geoJson.ajax("assets/data.geojson", {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+    // Legend
+    var labels = [];
+    var legendTitle = '<div style="font-weight:bold; font-size:16px; margin-bottom:4px;">National Park Acres</div>';
+
+    for (var i = 0; i < grades.length - 1; i++) {
+    labels.push('<i style="background:' + colors[i] + '"></i> ' + 
+                grades[i].toLocaleString() + ' - ' + grades[i+1].toLocaleString());
+    }
+    labels.push('<i style="background:' + colors[grades.length - 1] + '"></i> ' + grades[grades.length - 1].toLocaleString() + '+');
+
+    $(".legend").html(legendTitle + labels.join('<br>'));
+
+    // Attribution
+    map.attributionControl.addAttribution('Data &copy; <a href="https://www.nps.gov/">National Park Service</a> | Map by Zach Watkins');
+  
+  </script>
+</body>
+</html>
