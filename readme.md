@@ -23,13 +23,14 @@ The data includes the total acres of NPS-managed land in each state, with Alaska
 
 ## Technologies Used
 
-Leaflet.js – Core web mapping library
-Leaflet-AJAX – To load GeoJSON data asynchronously
-Chroma.js – For creating color scales
-jQuery – For DOM manipulation
-HTML5, CSS3, JavaScrip
+- Leaflet.js – Core web mapping library
+- Leaflet-AJAX – To load GeoJSON data asynchronously
+- Chroma.js – For creating color scales
+- jQuery – For DOM manipulation
+- HTML5, CSS3, JavaScrip
 
 ## Author
 
 Zachary Watkins
 Created for Lab 04: Interactive Thematic Webmap — GHY5818 Web Mapping
+
